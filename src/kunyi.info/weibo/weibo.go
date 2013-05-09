@@ -23,7 +23,7 @@ type Weibo struct {
 
 type UploadParam struct {
 	Status string
-	Pic *io.Reader
+	Pic io.Reader
 	Filename string
 }
 
@@ -39,14 +39,14 @@ type UploadResponse struct {
 	Original_Pic            string
 }
 
-type Error struct {
-	Error        string
+type WeiboError struct {
+	Err        string `json:"error"`
 	Error_Code int64
 	Request    string
 }
 
-func (e *Error) String() string {
-	return fmt.Sprintf("weibo error:[code:%d, desc:%s, request:%s]", e.Error_Code, e.Error, e.Request)
+func (e *WeiboError) String() string {
+	return fmt.Sprintf("weibo error:[code:%d, desc:%s, request:%s]", e.Error_Code, e.Err, e.Request)
 }
 
 func Request(req *http.Request, v interface{}) (bool, error) {
@@ -66,12 +66,12 @@ func Request(req *http.Request, v interface{}) (bool, error) {
 		return true, nil
 	} else {
 		bytes, _ := ioutil.ReadAll(resp.Body)
-		var e Error
+		var e WeiboError
 		err = json.Unmarshal(bytes, &e)
 		if err != nil {
 			return false, errors.New(fmt.Sprintf("encoding json error: %v",  err))
 		}
-		return false, e
+		return false, errors.New(fmt.Sprint(e))
 	}
 	return false, err
 }
@@ -80,7 +80,7 @@ func (wb *Weibo) Upload(param *UploadParam, v interface{}) (bool, error) {
 	buf := new(bytes.Buffer)
 	w := multipart.NewWriter(buf)
 	defer w.Close()
-	w.WriteField("access_token",s.AccessToken)
+	w.WriteField("access_token",wb.AccessToken)
 	w.WriteField("status",param.Status)
 	wr, err := w.CreateFormFile("pic", param.Filename)
 	if err != nil {

@@ -6,9 +6,6 @@ import(
 	"kunyi.info/weibo"
 	"fmt"
 	"bytes"
-	"io"
-	"net/http"
-	"mime/multipart"
 )
 
 func main(){
@@ -22,12 +19,12 @@ func main(){
 	var wb = &weibo.Weibo{}
 	wb.Init()
 	status :="#calvin&hobbes#"
-	param := weibo.UploadParam{Pic:&bytes.NewBuffer(picBytes), Status:status, Filename:"calvinandhobbes.gif"}
+	param := weibo.UploadParam{Pic:bytes.NewBuffer(picBytes), Status:status, Filename:"calvinandhobbes.gif"}
 
-	var post weibo.WeiboPost
-	_, err = weibo.Upload(req, &post)
+	var resp weibo.UploadResponse
+	_, err = wb.Upload(&param, &resp)
 	if err != nil {
 		panic (err)
 	}
-	fmt.Println(post.Text)
+	fmt.Println(resp.Text)
 }
