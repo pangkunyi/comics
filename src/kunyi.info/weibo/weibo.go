@@ -7,7 +7,6 @@ import (
 	"io"
 	"mime/multipart"
 	"bytes"
-	"os"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -79,7 +78,6 @@ func Request(req *http.Request, v interface{}) (bool, error) {
 func (wb *Weibo) Upload(param *UploadParam, v interface{}) (bool, error) {
 	buf := new(bytes.Buffer)
 	w := multipart.NewWriter(buf)
-	defer w.Close()
 	w.WriteField("access_token",wb.AccessToken)
 	w.WriteField("status",param.Status)
 	wr, err := w.CreateFormFile("pic", param.Filename)
@@ -90,23 +88,11 @@ func (wb *Weibo) Upload(param *UploadParam, v interface{}) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	w.Close()
 	req, err := http.NewRequest("POST", API_UPLOAD, buf)
 	if err != nil {
 		return false, err
 	}
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	return Request(req, v)
-}
-
-func (wb *Weibo) Init() error {
-	return wb.ReadToken()
-}
-
-func (wb *Weibo) ReadToken() error {
-	data, err := ioutil.ReadFile(os.Getenv("PWD") + "/token")
-	if err != nil {
-		return errors.New(fmt.Sprintf("fail to read access token: %v", err))
-	}
-	wb.AccessToken = string(data[:32])
-	return nil
 }

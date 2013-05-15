@@ -18,47 +18,48 @@ type GoComics struct {
 	Subfix string
 	DownloadDir string
 	url string
+	PicUrl string
 }
 
 func (gc *GoComics) Init(){
 	gc.Prefix =`class="strip" src="`
 	gc.Subfix =`"`
 	gc.url = BASE_URL+gc.Title+time.Now().Format("/2006/01/02")
-	fmt.Println(gc.url)
+	fmt.Println("comics base url: ",gc.url)
 }
 
-func (gc *GoComics) Parse() (string, error){
+func (gc *GoComics) Parse() error{
 	resp, err := http.Get(gc.url)
 	defer resp.Body.Close()
 	if err != nil {
-		return "",err
+		return err
 	}
 	bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	html := string(bytes)
 	idx := strings.Index(html, gc.Prefix)
 	if idx == -1 {
-		return "", errors.New("GoComics html invalid, maybe it changed.")
+		return errors.New("GoComics html invalid, maybe it changed.")
 	}
 	html = html[idx+len(gc.Prefix):]
 	idx = strings.Index(html, gc.Subfix)
 	if idx == -1 {
-		return "", errors.New("GoComics html invalid, maybe it changed.")
+		return errors.New("GoComics html invalid, maybe it changed.")
 	}
-	return html[:idx], nil
+	gc.PicUrl = html[:idx]
+	return nil
 }
 
 func (gc *GoComics) PicBytes() ([]byte, error) {
-	pic, err := gc.Parse()
-	if err != nil{
-		return nil, err
+	if gc.PicUrl == ""{
+		return nil, errors.New("PicUrl should not be empty")
 	}
-	fmt.Println("Got pic url: ", pic)
+	fmt.Println("Got pic url: ", gc.PicUrl)
 	client := &http.Client{}
-	req, err :=http.NewRequest("GET",pic,nil)
+	req, err :=http.NewRequest("GET",gc.PicUrl,nil)
 	gc.forgeryHttpRequest(req)
 	resp, err :=client.Do(req)
 	if err != nil{
