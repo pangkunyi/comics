@@ -22,10 +22,10 @@ const(
 func httpCall(req *http.Request, v interface{}) (bool, error){
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	defer resp.Body.Close()
 	if err != nil {
 		return false, errors.New(fmt.Sprintf("req url error: %s, %v", req.RequestURI, err))
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
 		body,err := ioutil.ReadAll(resp.Body)
@@ -59,11 +59,11 @@ func KeepAlive(){
 	req.Header.Set("X-Requested-With","XMLHttpRequest")
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	defer resp.Body.Close()
 	if err != nil {
 		fmt.Printf("fail to keep alive, cause by: %v\n", err)
 		return
 	}
+	defer resp.Body.Close()
 	fmt.Printf("keep alive weibo done.\n")
 }
 

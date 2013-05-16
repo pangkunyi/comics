@@ -30,10 +30,10 @@ func (gc *GoComics) Init(){
 
 func (gc *GoComics) Parse() error{
 	resp, err := http.Get(gc.url)
-	defer resp.Body.Close()
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err

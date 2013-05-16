@@ -51,10 +51,10 @@ func (e *WeiboError) String() string {
 func Request(req *http.Request, v interface{}) (bool, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	defer resp.Body.Close()
 	if err != nil {
 		return false, errors.New(fmt.Sprintf("fetch url error: %s, %v", req.RequestURI, err))
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
 		d := json.NewDecoder(resp.Body)
