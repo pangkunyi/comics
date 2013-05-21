@@ -14,16 +14,7 @@ import(
 var ac weibo.Account
 func main(){
 	ac.Init()
-	
 	for {
-  err := ac.Login()
- 	if err != nil{
- 		fmt.Printf("weibo login error: %v\n",err)
-	 	fmt.Println("sleep 1 min for re-login weibo")
-	 	time.Sleep(1 * 60 * time.Second)
-			continue
- 	}
- 	writeCookie(ac.Cookie)
 		postCalvinAndHobbes()
 		fmt.Println("sleep 5 min for check comics update")
 		time.Sleep(5 * 60 * time.Second)
@@ -47,9 +38,12 @@ func postComics(title, status string){
 	if gc.PicUrl == loadLastPicUrl() {
 		fmt.Println("comics not update")
 		return
-	}else{
-		writeLastPicUrl(gc.PicUrl)
 	}
+	err = ac.Login()
+ 	if err != nil{
+ 		fmt.Printf("weibo login error: %v\n",err)
+		return
+ 	}
 	picBytes, err := gc.PicBytes()
 	if err != nil {
 		fmt.Printf("fail to get pic data, cause of: %v\n", err)
@@ -79,6 +73,7 @@ func postComics(title, status string){
 			fmt.Printf("fail to upload pic data to weibo, cause of: %v\n", resp)
 			return
 	}
+	writeLastPicUrl(gc.PicUrl)
 	fmt.Println("Done.")
 }
 
