@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"io/ioutil"
 	"bytes"
 )
 
