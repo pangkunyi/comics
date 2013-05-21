@@ -8,26 +8,17 @@ import(
 	"kunyi.info/weibo"
 	"fmt"
 	"bytes"
-	"time"
 )
 
-var ac weibo.Account
+var su = "Y2FsdmluYW5kaG9iYmVzJTQwcXEuY29t"
 func main(){
-	ac.Init()
-	
-	for {
-  err := ac.Login()
- 	if err != nil{
- 		fmt.Printf("weibo login error: %v\n",err)
-	 	fmt.Println("sleep 1 min for re-login weibo")
-	 	time.Sleep(1 * 60 * time.Second)
-			continue
- 	}
- 	writeCookie(ac.Cookie)
-		postCalvinAndHobbes()
-		fmt.Println("sleep 5 min for check comics update")
-		time.Sleep(5 * 60 * time.Second)
+	ac :=weibo.Account{UserName:su, Password:"connect0829"}
+ err := ac.Login()
+	if err != nil{
+		panic(err)
 	}
+	writeCookie(ac.Cookie)
+	postCalvinAndHobbes()
 }
 
 func postCalvinAndHobbes(){
@@ -57,7 +48,7 @@ func postComics(title, status string){
 	}
 
 	var resp interface{}
-	_, err = ac.PicUpload(bytes.NewBuffer(picBytes), &resp)
+	_, err = weibo.PicUpload(bytes.NewBuffer(picBytes), &resp)
 	if err != nil {
 		fmt.Printf("fail to upload pic data to weibo, cause of: %v\n", err)
 		return
@@ -66,7 +57,7 @@ func postComics(title, status string){
 
 	if picM["code"].(string) == "A00006" {
 		picId :=picM["data"].(map[string]interface{})["pics"].(map[string]interface{})["pic_1"].(map[string]interface{})["pid"].(string);
-		_, err =ac.Add(picId, &resp)
+		_, err =weibo.Add(picId, &resp)
 		if err != nil {
 			fmt.Printf("post to weibo, cause of: %v\n", err)
 			return

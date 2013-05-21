@@ -3,6 +3,8 @@ package weibo
 
 import(
 	"fmt"
+	"net/http"
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
@@ -74,4 +76,30 @@ func loadClientSecret() string{
 		return ""
 	}
 	return string(data)
+}
+
+func httpCall(req *http.Request, v interface{}) (bool, error){
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	defer resp.Body.Close()
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("req url error: %s, %v", req.RequestURI, err))
+	}
+
+	if resp.StatusCode == 200 {
+		body,err := ioutil.ReadAll(resp.Body)
+		fmt.Println("req uri: ", req.URL.Path)
+		fmt.Println("resp body: ", gbk.ConvertString(string(body)))
+		if strings.Contains(req.URL.Path, "pic_upload"){
+			bodyString := string(body)
+			body = body[strings.LastIndex(bodyString, ">")+1:]
+		}
+		d := json.NewDecoder(bytes.NewBuffer(body))
+		err = d.Decode(&v)
+		if err != nil {
+			return false, errors.New(fmt.Sprintf("encoding json error: %v",  err))
+		}
+		return true, nil
+	}
+	return false, err
 }
