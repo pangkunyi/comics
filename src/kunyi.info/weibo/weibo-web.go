@@ -32,13 +32,11 @@ func (ac *Account) KeepAlive(){
 	req.Header.Set("X-Requested-With","XMLHttpRequest")
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	defer resp.Body.Close()
 	if err != nil {
 		fmt.Printf("fail to keep alive, cause by: %v\n", err)
 		return
 	}
-	body, err := ioutil.ReadAll(resp.Body)
-	fmt.Println("resp body: ", gbk.ConvertString(string(body)))
+	defer resp.Body.Close()
 	fmt.Printf("keep alive weibo done.\n")
 }
 
