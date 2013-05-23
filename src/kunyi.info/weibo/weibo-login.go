@@ -117,8 +117,8 @@ func (ac *Account) saveCookie() error{
 	if err != nil{
 		return err
 	}
+	ac.Cookie=""
 	for _, cookie := range resp.Header["Set-Cookie"] {
-		fmt.Println("ori weibo cookie:", cookie)
 		ac.Cookie = ac.Cookie + cookie[:strings.Index(cookie,";")+1]+" "
 	}
 	fmt.Println("weibo cookie:", ac.Cookie)
